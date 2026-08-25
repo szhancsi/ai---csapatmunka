@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOVA Tasks – Task Manager</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">N</div>
+                <div>
+                    <strong>NOVA</strong>
+                    <span>TASKS</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav" aria-label="Feladat szűrők">
+                <p class="nav-label">MUNKATÉR</p>
+                <button class="nav-item active" data-filter="">
+                    <span class="nav-icon">⌂</span>
+                    <span>Összes feladat</span>
+                </button>
+                <button class="nav-item" data-filter="TODO">
+                    <span class="nav-dot todo"></span>
+                    <span>Teendők</span>
+                </button>
+                <button class="nav-item" data-filter="IN_PROGRESS">
+                    <span class="nav-dot progress"></span>
+                    <span>Folyamatban</span>
+                </button>
+                <button class="nav-item" data-filter="DONE">
+                    <span class="nav-dot done"></span>
+                    <span>Elkészült</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="sprint-card">
+                    <span class="sprint-kicker">SCRUM PROJEKT</span>
+                    <strong>Sprint 01</strong>
+                    <p>Task Manager alkalmazás</p>
+                    <div class="sprint-progress"><span></span></div>
+                    <small>Frontend · Backend · Adatbázis</small>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <header class="topbar">
+                <div>
+                    <p class="breadcrumb">Munkatér / Task Manager</p>
+                    <h1>Feladatkezelő</h1>
+                </div>
+                <button id="newTaskBtn" class="primary-btn">
+                    <span>＋</span> Új feladat
+                </button>
+            </header>
+
+            <section class="welcome-panel">
+                <div>
+                    <p class="section-kicker">SPRINT ÁTTEKINTÉS</p>
+                    <h2>Tartsd kézben a csapat feladatait.</h2>
+                    <p>Hozz létre új teendőket, kövesd a státuszukat és tartsd szem előtt a határidőket.</p>
+                </div>
+                <div class="welcome-decoration" aria-hidden="true">
+                    <span class="decor-square one"></span>
+                    <span class="decor-square two"></span>
+                    <span class="decor-square three"></span>
+                </div>
+            </section>
+
+            <section class="stats" aria-label="Feladat statisztikák">
+                <article class="stat-card total-stat">
+                    <div class="stat-icon">▦</div>
+                    <div>
+                        <span>Összes feladat</span>
+                        <strong id="allCount">0</strong>
+                    </div>
+                </article>
+                <article class="stat-card todo-stat">
+                    <div class="stat-icon">○</div>
+                    <div>
+                        <span>Teendő</span>
+                        <strong id="todoCount">0</strong>
+                    </div>
+                </article>
+                <article class="stat-card progress-stat">
+                    <div class="stat-icon">◔</div>
+                    <div>
+                        <span>Folyamatban</span>
+                        <strong id="progressCount">0</strong>
+                    </div>
+                </article>
+                <article class="stat-card done-stat">
+                    <div class="stat-icon">✓</div>
+                    <div>
+                        <span>Kész</span>
+                        <strong id="doneCount">0</strong>
+                    </div>
+                </article>
+            </section>
+
+            <section class="task-section">
+                <div class="section-header">
+                    <div>
+                        <p class="section-kicker">FELADATLISTA</p>
+                        <h2>Aktuális feladatok</h2>
+                    </div>
+                    <label class="filter-label">
+                        <span>Státusz szerint</span>
+                        <select id="statusFilter">
+                            <option value="">Összes</option>
+                            <option value="TODO">Teendő</option>
+                            <option value="IN_PROGRESS">Folyamatban</option>
+                            <option value="DONE">Kész</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div id="message" class="message hidden" role="alert"></div>
+                <div id="taskList" class="task-grid"></div>
+
+                <div id="emptyState" class="empty-state hidden">
+                    <div class="empty-illustration">＋</div>
+                    <h3>Itt most nincs feladat</h3>
+                    <p>Hozz létre egy újat, vagy válassz másik státuszt.</p>
+                    <button class="empty-create-btn" type="button" onclick="document.getElementById('newTaskBtn').click()">Új feladat létrehozása</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="taskModal" class="modal-backdrop hidden" aria-hidden="true">
+        <section class="modal task-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-accent"></div>
+            <div class="modal-header">
+                <div>
+                    <p class="section-kicker">FELADAT SZERKESZTŐ</p>
+                    <h2 id="modalTitle">Új feladat</h2>
+                </div>
+                <button class="icon-btn" id="closeModalBtn" aria-label="Bezárás">×</button>
+            </div>
+
+            <form id="taskForm" novalidate>
+                <input type="hidden" id="taskId">
+
+                <label class="field full-field">
+                    <span>Cím <em>*</em></span>
+                    <input id="title" type="text" maxlength="255" placeholder="Pl. API endpointok elkészítése">
+                    <small id="titleError" class="field-error"></small>
+                </label>
+
+                <label class="field full-field">
+                    <span>Leírás</span>
+                    <textarea id="description" maxlength="2000" rows="5" placeholder="Írd le röviden, mit kell elvégezni..."></textarea>
+                </label>
+
+                <div class="form-row">
+                    <label class="field">
+                        <span>Státusz</span>
+                        <select id="status">
+                            <option value="TODO">Teendő</option>
+                            <option value="IN_PROGRESS">Folyamatban</option>
+                            <option value="DONE">Kész</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>Határidő</span>
+                        <input id="deadline" type="date">
+                    </label>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="secondary-btn" id="cancelBtn">Mégse</button>
+                    <button type="submit" class="primary-btn" id="saveBtn">Feladat mentése</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <div id="detailsModal" class="modal-backdrop hidden" aria-hidden="true">
+        <section class="modal small-modal" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <div>
+                    <p class="section-kicker">ÁTTEKINTÉS</p>
+                    <h2>Feladat részletei</h2>
+                </div>
+                <button class="icon-btn" id="closeDetailsBtn" aria-label="Bezárás">×</button>
+            </div>
+            <div id="taskDetails"></div>
+        </section>
+    </div>
+
+    <div id="deleteModal" class="modal-backdrop hidden" aria-hidden="true">
+        <section class="modal small-modal delete-modal" role="dialog" aria-modal="true">
+            <div class="danger-icon">!</div>
+            <h2>Feladat törlése</h2>
+            <p>Biztosan törölni szeretnéd? Ez a művelet nem vonható vissza.</p>
+            <div class="modal-actions">
+                <button class="secondary-btn" id="cancelDeleteBtn">Mégse</button>
+                <button class="danger-btn" id="confirmDeleteBtn">Igen, törlöm</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
